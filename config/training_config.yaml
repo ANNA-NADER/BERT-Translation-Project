@@ -1,0 +1,72 @@
+# Training Configuration
+training:
+  # Data
+  dataset_name: "Helsinki-NLP/opus-100"
+  dataset_config: "en-fr"
+  train_split: "train"
+  val_split: "validation"
+  test_split: "test"
+  
+  # Preprocessing
+  max_source_length: 128
+  max_target_length: 128
+  min_length: 5
+  max_length: 200
+  
+  # Training hyperparameters
+  batch_size: 16
+  eval_batch_size: 8
+  num_epochs: 10
+  learning_rate: 5.0e-5
+  warmup_steps: 4000
+  weight_decay: 0.01
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+  
+  # Optimizer
+  optimizer: "adamw"
+  adam_beta1: 0.9
+  adam_beta2: 0.98
+  adam_epsilon: 1.0e-9
+  
+  # Learning rate scheduler
+  scheduler: "linear_warmup"
+  
+  # Checkpointing
+  save_steps: 5000
+  save_total_limit: 3
+  checkpoint_dir: "checkpoints"
+  resume_from_checkpoint: null
+  
+  # Logging
+  logging_steps: 100
+  eval_steps: 2500
+  log_dir: "logs"
+  tensorboard_dir: "runs"
+  
+  # Device
+  device: "cuda"  # or "cpu"
+  mixed_precision: true  # Use automatic mixed precision (AMP)
+  num_workers: 4
+  
+  # Seed for reproducibility
+  seed: 42
+
+  # Experiment tracking (Weights & Biases)
+  use_wandb: false
+  wandb_project: "bert-translation"
+  
+# Evaluation Configuration
+evaluation:
+  metrics:
+    - "bleu"
+    - "sacrebleu"
+    - "perplexity"
+  
+  # BLEU configuration
+  bleu_tokenize: "13a"  # Standard tokenization
+  bleu_lowercase: false
+  
+  # Generation during evaluation
+  num_beams: 5
+  max_gen_length: 128
