@@ -25,10 +25,22 @@ class Translator:
         self.model.eval()
 
     def translate(self, text: str, max_length: int = 512) -> str:
-        inputs = self.tokenizer([text], return_tensors="pt", padding=True, truncation=True)
+        inputs = self.tokenizer(
+            [text],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
         with torch.no_grad():
-            output_ids = self.model.generate(**inputs, num_beams=5, max_length=max_length)
-        return self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
+            output_ids = self.model.generate(
+                **inputs,
+                num_beams=5,
+                max_length=max_length,
+            )
+        return self.tokenizer.decode(
+            output_ids[0],
+            skip_special_tokens=True,
+        )
 
 
 def main():
