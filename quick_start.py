@@ -30,9 +30,8 @@ if __name__ == "__main__":
     print("=" * 60)
     print("\nNext steps:")
     print(
-        "1. Test translation: python app/cli.py translate --checkpoint checkpoints/best_model.pt --interactive"
+        "1. Test translation: python app/cli.py translate "
+        "--checkpoint checkpoints/best_model.pt --interactive"
     )
-    print(
-        "2. Launch web UI: python app/web_interface.py --checkpoint checkpoints/best_model.pt"
-    )
+    print("2. Launch web UI: python app/web_interface.py --checkpoint checkpoints/best_model.pt")
     print("3. Start API: python app/api.py --checkpoint checkpoints/best_model.pt")

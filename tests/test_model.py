@@ -4,6 +4,7 @@ Tests for BERT2BERT translation model.
 
 import pytest
 import torch
+
 from src.model.bert_translator import BERTTranslator
 
 

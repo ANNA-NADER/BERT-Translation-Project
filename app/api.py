@@ -2,17 +2,16 @@
 REST API for BERT translation using FastAPI
 """
 
+import sys
+from pathlib import Path
+
+import torch
+import uvicorn
+import yaml
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import torch
-import yaml
-from pathlib import Path
-from typing import List, Optional
-import uvicorn
 from transformers import pipeline
-
-import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -23,14 +22,14 @@ from src.utils import get_tokenizers
 # Request/Response models
 class TranslationRequest(BaseModel):
     text: str
-    max_length: Optional[int] = 128
-    num_beams: Optional[int] = 5
+    max_length: int | None = 128
+    num_beams: int | None = 5
 
 
 class BatchTranslationRequest(BaseModel):
-    texts: List[str]
-    max_length: Optional[int] = 128
-    num_beams: Optional[int] = 5
+    texts: list[str]
+    max_length: int | None = 128
+    num_beams: int | None = 5
 
 
 class TranslationResponse(BaseModel):
@@ -39,7 +38,7 @@ class TranslationResponse(BaseModel):
 
 
 class BatchTranslationResponse(BaseModel):
-    translations: List[TranslationResponse]
+    translations: list[TranslationResponse]
 
 
 class ModelInfo(BaseModel):
@@ -89,7 +88,7 @@ def load_model(checkpoint_path: str, config_path: str):
 
     # Load model config
     model_config_path = Path(config_path).parent / "model_config.yaml"
-    with open(model_config_path, "r") as f:
+    with open(model_config_path) as f:
         model_config = yaml.safe_load(f)
 
     model_config["model"]["vocab"]["target_vocab_size"] = len(target_tokenizer)
@@ -222,14 +221,12 @@ async def translate(request: TranslationRequest):
                 )
 
             # Decode
-            translation = target_tokenizer.decode(
-                generated[0], skip_special_tokens=True
-            )
+            translation = target_tokenizer.decode(generated[0], skip_special_tokens=True)
 
         return TranslationResponse(source=request.text, translation=translation)
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=str(err)) from err
 
 
 @app.post("/batch_translate", response_model=BatchTranslationResponse)
@@ -250,11 +247,9 @@ async def batch_translate(request: BatchTranslationRequest):
                 max_length=request.max_length,
                 num_beams=request.num_beams,
             )
-            for text, res in zip(request.texts, results):
+            for text, res in zip(request.texts, results, strict=False):
                 translations.append(
-                    TranslationResponse(
-                        source=text, translation=res["translation_text"]
-                    )
+                    TranslationResponse(source=text, translation=res["translation_text"])
                 )
         else:
             for text in request.texts:
@@ -278,18 +273,14 @@ async def batch_translate(request: BatchTranslationRequest):
                     )
 
                 # Decode
-                translation = target_tokenizer.decode(
-                    generated[0], skip_special_tokens=True
-                )
+                translation = target_tokenizer.decode(generated[0], skip_special_tokens=True)
 
-                translations.append(
-                    TranslationResponse(source=text, translation=translation)
-                )
+                translations.append(TranslationResponse(source=text, translation=translation))
 
         return BatchTranslationResponse(translations=translations)
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=str(err)) from err
 
 
 def run_server(

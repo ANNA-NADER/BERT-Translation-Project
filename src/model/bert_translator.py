@@ -5,9 +5,8 @@ Combines BERT encoder with transformer decoder for translation
 
 import torch
 import torch.nn as nn
-from transformers import EncoderDecoderModel
-from typing import Optional, Dict
 import yaml
+from transformers import EncoderDecoderModel
 
 
 class BERTTranslator(nn.Module):
@@ -16,7 +15,7 @@ class BERTTranslator(nn.Module):
     Uses pre-trained BERT for both encoder and decoder (BERT2BERT).
     """
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: dict):
         """
         Args:
             config: Model configuration dictionary
@@ -37,12 +36,8 @@ class BERTTranslator(nn.Module):
         self.model.config.decoder_start_token_id = getattr(
             self.model.config.encoder, "cls_token_id", 101
         )
-        self.model.config.pad_token_id = getattr(
-            self.model.config.encoder, "pad_token_id", 0
-        )
-        self.model.config.eos_token_id = getattr(
-            self.model.config.encoder, "sep_token_id", 102
-        )
+        self.model.config.pad_token_id = getattr(self.model.config.encoder, "pad_token_id", 0)
+        self.model.config.eos_token_id = getattr(self.model.config.encoder, "sep_token_id", 102)
 
         # Generation config
         self.gen_config = model_config.get("generation", {})
@@ -65,7 +60,7 @@ class BERTTranslator(nn.Module):
     @classmethod
     def from_config_file(cls, config_path: str):
         """Load model from configuration file."""
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             config = yaml.safe_load(f)
         return cls(config)
 
@@ -73,8 +68,8 @@ class BERTTranslator(nn.Module):
         self,
         input_ids: torch.Tensor,
         target_ids: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        target_mask: Optional[torch.Tensor] = None,
+        attention_mask: torch.Tensor | None = None,
+        target_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """
         Forward pass for training.
@@ -88,17 +83,15 @@ class BERTTranslator(nn.Module):
         Returns:
             ModelOutput with loss and logits
         """
-        outputs = self.model(
-            input_ids=input_ids, attention_mask=attention_mask, labels=target_ids
-        )
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels=target_ids)
         return outputs
 
     @torch.no_grad()
     def generate(
         self,
         input_ids: torch.Tensor,
-        max_length: Optional[int] = None,
-        num_beams: Optional[int] = None,
+        max_length: int | None = None,
+        num_beams: int | None = None,
         temperature: float = 1.0,
         top_k: int = 50,
         top_p: float = 0.95,

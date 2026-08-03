@@ -3,9 +3,10 @@ Bidirectional English <-> French web interface using Helsinki-NLP MarianMT model
 Compatible with transformers v5.x.
 """
 
-import gradio as gr
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import gradio as gr
 import torch
 from transformers import MarianMTModel, MarianTokenizer
 
@@ -67,9 +68,7 @@ class TranslationInterface:
         self.translators["fr-en"] = Translator(MODELS["fr-en"])
         print("Both models ready.")
 
-    def translate(
-        self, text: str, direction: str, num_beams: int, max_length: int
-    ) -> str:
+    def translate(self, text: str, direction: str, num_beams: int, max_length: int) -> str:
         """Run translation in the selected direction."""
         if not text.strip():
             return ""
@@ -92,9 +91,12 @@ class TranslationInterface:
         """
 
         with gr.Blocks(css=css, title="EN ↔ FR Translator") as interface:
-            gr.Markdown("""# English ↔ French Translator
-Powered by [Helsinki-NLP MarianMT](https://huggingface.co/Helsinki-NLP) — production-quality neural machine translation.
-            """)
+            gr.Markdown(
+                """# English ↔ French Translator
+Powered by [Helsinki-NLP MarianMT](https://huggingface.co/Helsinki-NLP)
+— production-quality neural machine translation.
+                """
+            )
 
             direction = gr.State("en-fr")
 
@@ -124,9 +126,7 @@ Powered by [Helsinki-NLP MarianMT](https://huggingface.co/Helsinki-NLP) — prod
 
             with gr.Accordion("Options", open=False):
                 num_beams = gr.Slider(1, 10, value=5, step=1, label="Beam Size")
-                max_length = gr.Slider(
-                    32, 512, value=256, step=16, label="Max Output Length"
-                )
+                max_length = gr.Slider(32, 512, value=256, step=16, label="Max Output Length")
 
             gr.Markdown("### Examples")
             gr.Examples(
@@ -196,9 +196,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="EN <-> FR Translation Web Interface")
-    parser.add_argument(
-        "--share", action="store_true", help="Create a public Gradio link"
-    )
+    parser.add_argument("--share", action="store_true", help="Create a public Gradio link")
     parser.add_argument("--port", type=int, default=7860, help="Port to listen on")
     args = parser.parse_args()
 

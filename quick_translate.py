@@ -6,7 +6,6 @@ Compatible with transformers v5.x.
 import torch
 from transformers import MarianMTModel, MarianTokenizer
 
-
 MODELS = {
     "en-fr": "Helsinki-NLP/opus-mt-en-fr",
     "fr-en": "Helsinki-NLP/opus-mt-fr-en",

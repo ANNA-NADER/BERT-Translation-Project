@@ -2,9 +2,10 @@
 Unit tests for data preprocessing and dataset
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 from transformers import AutoTokenizer, BertTokenizer
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -55,7 +56,7 @@ class TestTextPreprocessor:
         source_texts = ["short sentence", "this is a medium length sentence", "x"]
         target_texts = ["phrase courte", "ceci est une phrase de longueur moyenne", "y"]
 
-        filtered_source, filtered_target = TextPreprocessor.filter_by_length(
+        filtered_source, _filtered_target = TextPreprocessor.filter_by_length(
             source_texts, target_texts, min_length=2, max_length=10
         )
 
@@ -67,7 +68,7 @@ class TestTextPreprocessor:
         source_texts = ["hello", "world", "hello"]
         target_texts = ["bonjour", "monde", "bonjour"]
 
-        unique_source, unique_target = TextPreprocessor.remove_duplicates(
+        unique_source, _unique_target = TextPreprocessor.remove_duplicates(
             source_texts, target_texts
         )
 
@@ -100,9 +101,7 @@ class TestDataset:
         source_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         target_tokenizer = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
 
-        dataset = TranslationDataset(
-            source_texts, target_texts, source_tokenizer, target_tokenizer
-        )
+        dataset = TranslationDataset(source_texts, target_texts, source_tokenizer, target_tokenizer)
 
         assert len(dataset) == 3
 

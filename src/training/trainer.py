@@ -2,23 +2,23 @@
 Training loop and utilities for BERT translation model
 """
 
+from pathlib import Path
+
 import torch
 import torch.nn as nn
+from loguru import logger
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torch.amp import autocast, GradScaler
-from transformers import get_linear_schedule_with_warmup
-from pathlib import Path
 from tqdm import tqdm
-from typing import Dict
-from loguru import logger
+from transformers import get_linear_schedule_with_warmup
 
 from .metrics import (
+    MetricsTracker,
+    compute_accuracy,
     compute_bleu,
     compute_perplexity,
-    compute_accuracy,
     decode_predictions,
-    MetricsTracker,
 )
 
 
@@ -33,7 +33,7 @@ class Trainer:
         model: nn.Module,
         train_loader: DataLoader,
         val_loader: DataLoader,
-        config: Dict,
+        config: dict,
         source_tokenizer,
         target_tokenizer,
         device: str = "cuda",
@@ -136,7 +136,7 @@ class Trainer:
         else:
             raise ValueError(f"Unknown scheduler: {scheduler_name}")
 
-    def train_epoch(self) -> Dict[str, float]:
+    def train_epoch(self) -> dict[str, float]:
         """
         Train for one epoch.
 
@@ -253,7 +253,7 @@ class Trainer:
         return metrics_tracker.compute()
 
     @torch.no_grad()
-    def evaluate(self, test_mode: bool = False) -> Dict[str, float]:
+    def evaluate(self, test_mode: bool = False) -> dict[str, float]:
         """
         Evaluate model on validation set.
 
@@ -343,7 +343,7 @@ class Trainer:
                     columns=["Source (EN)", "Reference (FR)", "Prediction (FR)"]
                 )
                 for src, ref, pred in zip(
-                    all_sources[:15], all_references[:15], all_predictions[:15]
+                    all_sources[:15], all_references[:15], all_predictions[:15], strict=False
                 ):
                     sample_table.add_data(src, ref, pred)
                 wandb.log({"evaluation_samples": sample_table}, step=self.global_step)
@@ -357,9 +357,7 @@ class Trainer:
         Main training loop.
         """
         logger.info(f"Starting training for {self.config['num_epochs']} epochs...")
-        logger.info(
-            f"Total steps: {len(self.train_loader) * self.config['num_epochs']}"
-        )
+        logger.info(f"Total steps: {len(self.train_loader) * self.config['num_epochs']}")
 
         for epoch in range(self.config["num_epochs"]):
             self.epoch = epoch
@@ -378,9 +376,7 @@ class Trainer:
             if val_metrics["loss"] < self.best_val_loss:
                 self.best_val_loss = val_metrics["loss"]
                 self.save_checkpoint("best_model")
-                logger.info(
-                    f"New best model saved (val_loss: {self.best_val_loss:.4f})"
-                )
+                logger.info(f"New best model saved (val_loss: {self.best_val_loss:.4f})")
 
             # Save epoch checkpoint
             self.save_checkpoint(f"checkpoint-epoch-{epoch + 1}")

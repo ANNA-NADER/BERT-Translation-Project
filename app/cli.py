@@ -3,18 +3,19 @@ Command-line interface for BERT translation
 """
 
 import argparse
+import sys
+from pathlib import Path
+
 import torch
 import yaml
-from pathlib import Path
-import sys
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.model import BERTTranslator
-from src.utils import get_tokenizers
 from src.data import create_dataloaders
+from src.model import BERTTranslator
 from src.training import Trainer
+from src.utils import get_tokenizers
 
 
 def translate_interactive(model, source_tokenizer, target_tokenizer, device):
@@ -53,9 +54,7 @@ def translate_interactive(model, source_tokenizer, target_tokenizer, device):
                 generated = model.generate(input_ids, max_length=128, num_beams=5)
 
             # Decode
-            translation = target_tokenizer.decode(
-                generated[0], skip_special_tokens=True
-            )
+            translation = target_tokenizer.decode(generated[0], skip_special_tokens=True)
 
             print(f"French:  {translation}\n")
 
@@ -67,9 +66,7 @@ def translate_interactive(model, source_tokenizer, target_tokenizer, device):
     print("\nGoodbye!")
 
 
-def translate_file(
-    input_file, output_file, model, source_tokenizer, target_tokenizer, device
-):
+def translate_file(input_file, output_file, model, source_tokenizer, target_tokenizer, device):
     """
     Translate a file line by line.
     """
@@ -78,7 +75,7 @@ def translate_file(
     model.eval()
 
     with (
-        open(input_file, "r", encoding="utf-8") as f_in,
+        open(input_file, encoding="utf-8") as f_in,
         open(output_file, "w", encoding="utf-8") as f_out,
     ):
         for line_num, line in enumerate(f_in, 1):
@@ -100,9 +97,7 @@ def translate_file(
                 generated = model.generate(input_ids, max_length=128, num_beams=5)
 
             # Decode
-            translation = target_tokenizer.decode(
-                generated[0], skip_special_tokens=True
-            )
+            translation = target_tokenizer.decode(generated[0], skip_special_tokens=True)
 
             f_out.write(translation + "\n")
 
@@ -117,7 +112,7 @@ def train_model(config_path, num_train_samples=None, num_val_samples=None):
     Train the translation model.
     """
     # Load config
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         config = yaml.safe_load(f)
 
     # Set device
@@ -133,7 +128,7 @@ def train_model(config_path, num_train_samples=None, num_val_samples=None):
 
     # Update model config with actual vocab sizes
     model_config_path = Path(config_path).parent / "model_config.yaml"
-    with open(model_config_path, "r") as f:
+    with open(model_config_path) as f:
         model_config = yaml.safe_load(f)
 
     model_config["model"]["vocab"]["target_vocab_size"] = len(target_tokenizer)
@@ -145,7 +140,7 @@ def train_model(config_path, num_train_samples=None, num_val_samples=None):
 
     # Create dataloaders
     print("\nLoading datasets...")
-    train_loader, val_loader, test_loader = create_dataloaders(
+    train_loader, val_loader, _test_loader = create_dataloaders(
         config,
         source_tokenizer,
         target_tokenizer,
@@ -175,7 +170,7 @@ def evaluate_model(checkpoint_path, config_path):
     Evaluate a trained model.
     """
     # Load config
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         config = yaml.safe_load(f)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -185,7 +180,7 @@ def evaluate_model(checkpoint_path, config_path):
 
     # Load model config
     model_config_path = Path(config_path).parent / "model_config.yaml"
-    with open(model_config_path, "r") as f:
+    with open(model_config_path) as f:
         model_config = yaml.safe_load(f)
 
     model_config["model"]["vocab"]["target_vocab_size"] = len(target_tokenizer)
@@ -268,9 +263,7 @@ def main():
         help="Path to config",
     )
     translate_parser.add_argument("--input", type=str, help="Input file to translate")
-    translate_parser.add_argument(
-        "--output", type=str, help="Output file for translations"
-    )
+    translate_parser.add_argument("--output", type=str, help="Output file for translations")
     translate_parser.add_argument(
         "--interactive", action="store_true", help="Interactive translation mode"
     )
@@ -303,7 +296,7 @@ def main():
         source_tokenizer, target_tokenizer = get_tokenizers()
 
         model_config_path = Path(args.config).parent / "model_config.yaml"
-        with open(model_config_path, "r") as f:
+        with open(model_config_path) as f:
             model_config = yaml.safe_load(f)
 
         model_config["model"]["vocab"]["target_vocab_size"] = len(target_tokenizer)

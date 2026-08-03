@@ -36,9 +36,7 @@ def test_model():
     print("TESTING TIME!")
     print("=" * 70)
     print("\nTest your model with:")
-    print(
-        "  python app/cli.py translate --checkpoint checkpoints/best_model.pt --interactive"
-    )
+    print("  python app/cli.py translate --checkpoint checkpoints/best_model.pt --interactive")
     print("\nOr evaluate metrics:")
     print("  python app/cli.py evaluate --checkpoint checkpoints/best_model.pt")
     print("\n" + "=" * 70)
@@ -100,9 +98,7 @@ def main():
     print("TRAINING COMPLETE!")
     print("=" * 70)
     print("\nYour model is ready! Test it with:")
-    print(
-        "  python app/cli.py translate --checkpoint checkpoints/best_model.pt --interactive"
-    )
+    print("  python app/cli.py translate --checkpoint checkpoints/best_model.pt --interactive")
     print("\nFor even better quality, run full training:")
     print("  python app/cli.py train --config config/training_config.yaml")
     print("=" * 70)

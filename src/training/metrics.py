@@ -2,15 +2,15 @@
 Evaluation metrics for translation
 """
 
+import math
+
 import torch
 from sacrebleu import corpus_bleu
-from typing import List, Dict
-import math
 
 
 def compute_bleu(
-    predictions: List[str], references: List[str], tokenize: str = "13a"
-) -> Dict[str, float]:
+    predictions: list[str], references: list[str], tokenize: str = "13a"
+) -> dict[str, float]:
     """
     Compute BLEU score using SacreBLEU.
 
@@ -51,9 +51,7 @@ def compute_perplexity(loss: float) -> float:
     return math.exp(min(loss, 100))  # Cap to prevent overflow
 
 
-def compute_accuracy(
-    logits: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100
-) -> float:
+def compute_accuracy(logits: torch.Tensor, labels: torch.Tensor, ignore_index: int = -100) -> float:
     """
     Compute token-level accuracy.
 
@@ -79,7 +77,7 @@ def compute_accuracy(
 
 def decode_predictions(
     token_ids: torch.Tensor, tokenizer, skip_special_tokens: bool = True
-) -> List[str]:
+) -> list[str]:
     """
     Decode token IDs to text.
 
@@ -111,7 +109,7 @@ class MetricsTracker:
         self.metrics = {}
         self.counts = {}
 
-    def update(self, metric_dict: Dict[str, float], count: int = 1):
+    def update(self, metric_dict: dict[str, float], count: int = 1):
         """
         Update metrics with new values.
 
@@ -127,7 +125,7 @@ class MetricsTracker:
             self.metrics[name] += value * count
             self.counts[name] += count
 
-    def compute(self) -> Dict[str, float]:
+    def compute(self) -> dict[str, float]:
         """
         Compute average metrics.
 

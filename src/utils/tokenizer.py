@@ -2,16 +2,16 @@
 Tokenizer utilities for translation
 """
 
-from transformers import BertTokenizer, AutoTokenizer, PreTrainedTokenizer
-from typing import Tuple
 from pathlib import Path
+
+from transformers import AutoTokenizer, BertTokenizer, PreTrainedTokenizer
 
 
 def get_tokenizers(
     source_model: str = "bert-base-uncased",
     target_model: str = "bert-base-uncased",
-    cache_dir: str = None,
-) -> Tuple[PreTrainedTokenizer, PreTrainedTokenizer]:
+    cache_dir: str | None = None,
+) -> tuple[PreTrainedTokenizer, PreTrainedTokenizer]:
     """
     Load source and target tokenizers.
 
@@ -67,7 +67,7 @@ def save_tokenizers(
     print(f"Tokenizers saved to {save_dir}")
 
 
-def load_tokenizers(load_dir: str) -> Tuple[PreTrainedTokenizer, PreTrainedTokenizer]:
+def load_tokenizers(load_dir: str) -> tuple[PreTrainedTokenizer, PreTrainedTokenizer]:
     """
     Load tokenizers from directory.
 
