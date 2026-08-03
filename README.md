@@ -199,21 +199,21 @@ from src.model import BERTTranslator
 from src.utils import get_tokenizers
 
 # Load model
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 source_tokenizer, target_tokenizer = get_tokenizers()
 
-model = BERTTranslator.from_config_file('config/model_config.yaml')
-checkpoint = torch.load('checkpoints/best_model.pt', map_location=device)
-model.load_state_dict(checkpoint['model_state_dict'])
+model = BERTTranslator.from_config_file("config/model_config.yaml")
+checkpoint = torch.load("checkpoints/best_model.pt", map_location=device)
+model.load_state_dict(checkpoint["model_state_dict"])
 model.to(device)
 model.eval()
 
 # Translate
 text = "Hello, how are you?"
-inputs = source_tokenizer(text, return_tensors='pt').to(device)
+inputs = source_tokenizer(text, return_tensors="pt").to(device)
 
 with torch.no_grad():
-    generated = model.generate(inputs['input_ids'], num_beams=5)
+    generated = model.generate(inputs["input_ids"], num_beams=5)
 
 translation = target_tokenizer.decode(generated[0], skip_special_tokens=True)
 print(f"Translation: {translation}")
